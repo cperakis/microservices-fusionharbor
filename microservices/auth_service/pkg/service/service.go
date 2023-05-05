@@ -54,8 +54,33 @@ func (s AuthSvc) Login(ctx context.Context, req *auth.LoginRequest) (*auth.Login
 	}, nil
 }
 
+// GetUser retrieves user information by validating the token and fetching user details by ID.
 func (s AuthSvc) GetUser(ctx context.Context, req *auth.GetUserRequest) (*auth.GetUserResponse, error) {
 	level.Info(s.logger).Log("msg", "Getting user by ID", "id", req.Id)
+
+	// Validate the JWT token.
+	level.Info(s.logger).Log("msg", "Validating token: ", "token:", req.Token)
+	token, err := s.validateToken(req.Token)
+	if err != nil {
+		level.Error(s.logger).Log("msg", "Invalid token", "error", err)
+		return nil, ErrUnauthorized
+	}
+
+	// Get the user ID from the token claims.
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		level.Error(s.logger).Log("msg", "Failed to get claims from token")
+		return nil, ErrUnauthorized
+	}
+
+	// Verify the user ID from the request matches the user ID in the token.
+	userID := claims["id"].(string)
+	if userID != req.Id {
+		level.Error(s.logger).Log("msg", "User ID mismatch")
+		return nil, ErrUnauthorized
+	}
+
+	// Fetch user details by ID.
 	user, err := s.db.GetUserByID(req.Id)
 	if err != nil {
 		level.Error(s.logger).Log("msg", "Error getting user by ID", "error", err)
@@ -111,4 +136,23 @@ func (s AuthSvc) generateToken(userID, username string) (string, error) {
 
 	level.Info(s.logger).Log("msg", "Token generated successfully for user", "username", username)
 	return tokenString, nil
+}
+
+// validateToken validates the JWT token and returns the parsed token if valid.
+func (s AuthSvc) validateToken(tokenString string) (*jwt.Token, error) {
+	level.Info(s.logger).Log("msg", "Validating token")
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrUnauthorized
+		}
+		return []byte("secret"), nil
+	})
+
+	if err != nil || !token.Valid {
+		level.Error(s.logger).Log("msg", "Invalid token", "error", err)
+		return nil, ErrUnauthorized
+	}
+
+	level.Info(s.logger).Log("msg", "Token validated successfully")
+	return token, nil
 }
