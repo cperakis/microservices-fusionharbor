@@ -36,7 +36,6 @@ func (s AuthSvc) Login(ctx context.Context, req *auth.LoginRequest) (*auth.Login
 		return nil, ErrInvalidCredentials
 	}
 	level.Info(s.logger).Log("msg", "User retrieved successfully", "username", user.Username)
-	level.Info(s.logger).Log("msg", "Comparing passwords", "DB password:", user.Password, " request password:", req.Password)
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		level.Error(s.logger).Log("msg", "Invalid password", "error", err)
 		return nil, ErrInvalidCredentials

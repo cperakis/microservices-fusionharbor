@@ -44,7 +44,7 @@ func (s *gormUserStore) GetUser(username string) (*auth.User, error) {
 
 func (s *gormUserStore) GetUserByID(id string) (*auth.User, error) {
 	user := User{}
-	err := s.db.Where("id = ?", id).First(user).Error
+	err := s.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
