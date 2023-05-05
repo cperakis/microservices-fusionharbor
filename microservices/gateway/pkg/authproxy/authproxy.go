@@ -6,16 +6,20 @@ import (
 	"net/http"
 
 	"github.com/fusionharbor/microservices/api/auth"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/gorilla/mux"
 )
 
 type AuthProxy struct {
 	client auth.AuthServiceClient
+	logger log.Logger
 }
 
-func NewAuthProxy(client auth.AuthServiceClient) *AuthProxy {
+func NewAuthProxy(client auth.AuthServiceClient, logger log.Logger) *AuthProxy {
 	return &AuthProxy{
 		client: client,
+		logger: logger,
 	}
 }
 
@@ -46,17 +50,30 @@ func (p *AuthProxy) getUser(w http.ResponseWriter, r *http.Request) {
 	id, ok := vars["id"]
 	if !ok {
 		http.Error(w, "invalid route", http.StatusBadRequest)
+		level.Error(p.logger).Log("error", "invalid route")
 		return
 	}
 
-	req := &auth.GetUserRequest{Id: id}
+	// Extract the token from the request header
+	token := r.Header.Get("Authorization")
+	level.Info(p.logger).Log("message", "GetUser request", "user_id", id, "token", token)
+	if token == "" {
+		http.Error(w, "missing token", http.StatusUnauthorized)
+		level.Error(p.logger).Log("error", "missing token")
+		return
+	}
+
+	// Include the token in the GetUserRequest
+	req := &auth.GetUserRequest{Id: id, Token: token}
 	res, err := p.client.GetUser(context.Background(), req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		level.Error(p.logger).Log("error", err.Error())
 		return
 	}
 
 	json.NewEncoder(w).Encode(res)
+	level.Info(p.logger).Log("message", "GetUser successful", "user_id", id)
 }
 
 func (p *AuthProxy) createUser(w http.ResponseWriter, r *http.Request) {

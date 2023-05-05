@@ -1,13 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/fusionharbor/microservices/api/auth"
 	"github.com/fusionharbor/microservices/api/project"
 	"github.com/fusionharbor/microservices/gateway/pkg/authproxy"
 	"github.com/fusionharbor/microservices/gateway/pkg/projectproxy"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
 )
@@ -31,7 +33,9 @@ func main() {
 	projectClient := project.NewProjectServiceClient(projectConn)
 
 	// Create Auth and Project proxies
-	authProxy := authproxy.NewAuthProxy(authClient)
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	logger = level.NewFilter(logger, level.AllowInfo())
+	authProxy := authproxy.NewAuthProxy(authClient, logger)
 	projectProxy := projectproxy.NewProjectProxy(projectClient)
 
 	// Create the gateway mux
@@ -40,7 +44,7 @@ func main() {
 	projectProxy.RegisterRoutes(r)
 
 	// Start the gateway
-	fmt.Println("Starting gateway on :8080")
+	level.Info(logger).Log("msg", "Starting gateway service on port 8080...")
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		panic(err)
 	}
