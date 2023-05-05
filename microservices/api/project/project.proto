@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package project;
+
+option go_package = "github.com/fusionharbor/microservices/api/project";
+
+service ProjectService {
+  rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+}
+
+message GetProjectRequest {
+  string id = 1;
+}
+
+message GetProjectResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message CreateProjectRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateProjectResponse {
+  string id = 1;
+  string message = 2;
+}
