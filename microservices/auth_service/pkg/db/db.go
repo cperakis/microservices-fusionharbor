@@ -37,6 +37,7 @@ func (s *gormUserStore) GetUser(username string) (*auth.User, error) {
 
 	userResponse := &auth.User{}
 	userResponse.Email = user.Email
+	userResponse.Password = user.Password
 	userResponse.Username = user.Username
 	return userResponse, nil
 }
