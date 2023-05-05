@@ -19,7 +19,6 @@ type User struct {
 	Username string `gorm:"unique"`
 	Password string
 	Email    string `gorm:"unique"`
-	ID       string `gorm:"primaryKey"`
 }
 
 type gormUserStore struct {
@@ -28,7 +27,7 @@ type gormUserStore struct {
 
 func (s *gormUserStore) GetUser(username string) (*auth.User, error) {
 	user := User{}
-	err := s.db.Where("username = ?", username).First(user).Error
+	err := s.db.Where("username = ?", username).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
@@ -37,7 +36,6 @@ func (s *gormUserStore) GetUser(username string) (*auth.User, error) {
 	}
 
 	userResponse := &auth.User{}
-	userResponse.Id = user.ID
 	userResponse.Email = user.Email
 	userResponse.Username = user.Username
 	return userResponse, nil
@@ -53,7 +51,6 @@ func (s *gormUserStore) GetUserByID(id string) (*auth.User, error) {
 		return nil, err
 	}
 	userResponse := &auth.User{}
-	userResponse.Id = user.ID
 	userResponse.Email = user.Email
 	userResponse.Username = user.Username
 	return userResponse, nil
@@ -64,7 +61,7 @@ func (s *gormUserStore) CreateUser(user *auth.User) error {
 	userDB.Email = user.Email
 	userDB.Password = user.Password
 	userDB.Username = user.Username
-	err := s.db.Create(userDB).Error
+	err := s.db.Create(&userDB).Error
 	return err
 }
 
