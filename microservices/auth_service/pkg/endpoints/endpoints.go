@@ -32,7 +32,7 @@ func MakeLoginEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 func MakeGetUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*auth.GetUserRequest)
-		user, err := svc.GetUser(ctx, &auth.GetUserRequest{Id: req.Id})
+		user, err := svc.GetUser(ctx, &auth.GetUserRequest{Id: req.Id, Token: req.Token})
 		if err != nil {
 			return nil, err
 		}
