@@ -12,6 +12,7 @@ import (
 type grpcServer struct {
 	login      grpc.Handler
 	getUser    grpc.Handler
+	getUsers   grpc.Handler
 	createUser grpc.Handler
 	auth.UnimplementedAuthServiceServer
 }
@@ -29,6 +30,11 @@ func NewGRPCServer(endpoints endpoints.Endpoints) auth.AuthServiceServer {
 			endpoints.GetUserEndpoint,
 			DecodeGRPCGetUserRequest,
 			EncodeGRPCGetUserResponse,
+		),
+		getUsers: grpc.NewServer(
+			endpoints.GetUsersEndpoint,
+			DecodeGRPCGetUsersRequest,
+			EncodeGRPCGetUsersResponse,
 		),
 		createUser: grpc.NewServer(
 			endpoints.CreateUserEndpoint,
@@ -59,6 +65,14 @@ func (s *grpcServer) GetUser(ctx context.Context, req *auth.GetUserRequest) (*au
 	return resp.(*auth.GetUserResponse), nil
 }
 
+func (s *grpcServer) GetUsers(ctx context.Context, req *auth.GetUsersRequest) (*auth.GetUsersResponse, error) {
+	_, resp, err := s.getUsers.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*auth.GetUsersResponse), nil
+}
+
 func (s *grpcServer) CreateUser(ctx context.Context, req *auth.CreateUserRequest) (*auth.CreateUserResponse, error) {
 	_, resp, err := s.createUser.ServeGRPC(ctx, req)
 	if err != nil {
@@ -80,6 +94,14 @@ func DecodeGRPCGetUserRequest(_ context.Context, grpcReq interface{}) (interface
 }
 
 func EncodeGRPCGetUserResponse(_ context.Context, response interface{}) (interface{}, error) {
+	return response, nil
+}
+
+func DecodeGRPCGetUsersRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	return grpcReq, nil
+}
+
+func EncodeGRPCGetUsersResponse(_ context.Context, response interface{}) (interface{}, error) {
 	return response, nil
 }
 

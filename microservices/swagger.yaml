@@ -33,7 +33,7 @@ paths:
         500:
           description: Internal server error
 
-  /user:
+  /users:
     post:
       summary: Create a new user
       operationId: createUser
@@ -54,7 +54,29 @@ paths:
         500:
           description: Internal server error
 
-  /user/{id}:
+    get:
+      summary: Get users
+      operationId: getUsers
+      tags:
+        - auth
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved users
+          schema:
+            $ref: "#/definitions/GetUsersResponse"
+        400:
+          description: Bad request
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /users/{id}:
     get:
       summary: Get user information
       operationId: getUser
@@ -136,4 +158,66 @@ definitions:
     type: object
     properties:
       token:
+        type: string
+
+  CreateUserRequest:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      email:
+        type: string
+      role:
+        type: string
+
+  CreateUserResponse:
+    type: object
+    properties:
+      id:
+        type: string
+
+  GetUserResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      username:
+        type: string
+      email:
+        type: string
+      role:
+        type: string
+
+  GetUsersResponse:
+    type: object
+    properties:
+      users:
+        type: array
+        items:
+          $ref: "#/definitions/GetUserResponse"
+
+  CreateProjectRequest:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+
+  CreateProjectResponse:
+    type: object
+    properties:
+      id:
+        type: string
+
+  GetProjectResponse:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
         type: string

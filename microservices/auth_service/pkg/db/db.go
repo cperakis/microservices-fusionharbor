@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/fusionharbor/microservices/api/auth"
 	"gorm.io/driver/mysql"
@@ -10,6 +11,7 @@ import (
 
 type UserStore interface {
 	GetUser(username string) (*auth.User, error)
+	GetUsers() ([]*auth.User, error)
 	GetUserByID(id string) (*auth.User, error)
 	CreateUser(user *auth.User) error
 }
@@ -19,6 +21,7 @@ type User struct {
 	Username string `gorm:"unique"`
 	Password string
 	Email    string `gorm:"unique"`
+	Role     string
 }
 
 type gormUserStore struct {
@@ -37,9 +40,31 @@ func (s *gormUserStore) GetUser(username string) (*auth.User, error) {
 
 	userResponse := &auth.User{}
 	userResponse.Email = user.Email
+	userResponse.Role = user.Role
 	userResponse.Password = user.Password
 	userResponse.Username = user.Username
 	return userResponse, nil
+}
+
+func (s *gormUserStore) GetUsers() ([]*auth.User, error) {
+	var users []User
+	err := s.db.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+
+	userResponses := make([]*auth.User, len(users))
+	for i, user := range users {
+		userResponses[i] = &auth.User{
+			Id:       strconv.Itoa(int(user.ID)),
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
+			// You may not want to include the password in the response
+		}
+	}
+
+	return userResponses, nil
 }
 
 func (s *gormUserStore) GetUserByID(id string) (*auth.User, error) {
@@ -53,6 +78,7 @@ func (s *gormUserStore) GetUserByID(id string) (*auth.User, error) {
 	}
 	userResponse := &auth.User{}
 	userResponse.Email = user.Email
+	userResponse.Role = user.Role
 	userResponse.Username = user.Username
 	return userResponse, nil
 }
@@ -60,6 +86,7 @@ func (s *gormUserStore) GetUserByID(id string) (*auth.User, error) {
 func (s *gormUserStore) CreateUser(user *auth.User) error {
 	userDB := User{}
 	userDB.Email = user.Email
+	userDB.Role = user.Role
 	userDB.Password = user.Password
 	userDB.Username = user.Username
 	err := s.db.Create(&userDB).Error

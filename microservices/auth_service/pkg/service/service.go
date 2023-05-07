@@ -85,9 +85,41 @@ func (s AuthSvc) GetUser(ctx context.Context, req *auth.GetUserRequest) (*auth.G
 
 	level.Info(s.logger).Log("msg", "User retrieved successfully", "username", user.Username)
 	return &auth.GetUserResponse{
-		Id:       user.Id,
-		Username: user.Username,
-		Email:    user.Email,
+		User: user,
+	}, nil
+}
+
+// GetUser retrieves user information by validating the token and fetching user details by ID.
+func (s AuthSvc) GetUsers(ctx context.Context, req *auth.GetUsersRequest) (*auth.GetUsersResponse, error) {
+	level.Info(s.logger).Log("msg", "Getting users")
+	// Validate the JWT token.
+	level.Info(s.logger).Log("msg", "Validating token: ", "token:", req.Token)
+	token, err := s.validateToken(req.Token)
+	if err != nil {
+		level.Error(s.logger).Log("msg", "Invalid token", "error", err)
+		return nil, ErrUnauthorized
+	}
+
+	// Print the raw token claims
+	level.Info(s.logger).Log("msg", "Raw token claims:", "claims", token.Claims)
+
+	// Get the user ID from the token claims.
+	_, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		level.Error(s.logger).Log("msg", "Failed to get claims from token")
+		return nil, ErrUnauthorized
+	}
+
+	// Fetch user details by ID.
+	users, err := s.db.GetUsers()
+	if err != nil {
+		level.Error(s.logger).Log("msg", "Error getting users", "error", err)
+		return nil, ErrUnauthorized
+	}
+
+	level.Info(s.logger).Log("msg", "Users retrieved successfully", users)
+	return &auth.GetUsersResponse{
+		Users: users,
 	}, nil
 }
 
@@ -103,6 +135,7 @@ func (s AuthSvc) CreateUser(ctx context.Context, req *auth.CreateUserRequest) (*
 		Username: req.Username,
 		Password: string(hashedPwd),
 		Email:    req.Email,
+		Role:     req.Role,
 	}
 
 	if err := s.db.CreateUser(&user); err != nil {

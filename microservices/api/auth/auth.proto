@@ -7,6 +7,7 @@ option go_package = "github.com/fusionharbor/microservices/api/auth";
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 }
 
@@ -25,16 +26,23 @@ message GetUserRequest {
   string token = 2;
 }
 
+message GetUsersRequest {
+  string token = 2;
+}
+
 message GetUserResponse {
-  string id = 1;
-  string username = 2;
-  string email = 3;
+  User user = 1;
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
 }
 
 message CreateUserRequest {
   string username = 1;
   string email = 2;
   string password = 3;
+  string role = 4;
 }
 
 message CreateUserResponse {
@@ -47,4 +55,5 @@ message User {
   string username = 2;
   string password = 3;
   string email = 4;
+  string role = 5;
 }

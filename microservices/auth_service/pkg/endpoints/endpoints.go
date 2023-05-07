@@ -11,7 +11,17 @@ import (
 type Endpoints struct {
 	LoginEndpoint      endpoint.Endpoint
 	GetUserEndpoint    endpoint.Endpoint
+	GetUsersEndpoint   endpoint.Endpoint
 	CreateUserEndpoint endpoint.Endpoint
+}
+
+func NewEndpoints(svc service.AuthSvc) Endpoints {
+	return Endpoints{
+		LoginEndpoint:      MakeLoginEndpoint(svc),
+		GetUserEndpoint:    MakeGetUserEndpoint(svc),
+		GetUsersEndpoint:   MakeGetUsersEndpoint(svc),
+		CreateUserEndpoint: MakeCreateUserEndpoint(svc),
+	}
 }
 
 func MakeLoginEndpoint(svc service.AuthSvc) endpoint.Endpoint {
@@ -37,9 +47,20 @@ func MakeGetUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 			return nil, err
 		}
 		return &auth.GetUserResponse{
-			Id:       user.Id,
-			Username: user.Username,
-			Email:    user.Email,
+			User: user.User,
+		}, nil
+	}
+}
+
+func MakeGetUsersEndpoint(svc service.AuthSvc) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(*auth.GetUsersRequest)
+		users, err := svc.GetUsers(ctx, &auth.GetUsersRequest{Token: req.Token})
+		if err != nil {
+			return nil, err
+		}
+		return &auth.GetUsersResponse{
+			Users: users.Users,
 		}, nil
 	}
 }
@@ -50,6 +71,7 @@ func MakeCreateUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 		createUser := &auth.CreateUserRequest{
 			Username: req.Username,
 			Email:    req.Email,
+			Role:     req.Role,
 			Password: req.Password,
 		}
 		user, err := svc.CreateUser(ctx, createUser)
@@ -57,13 +79,5 @@ func MakeCreateUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 			return nil, err
 		}
 		return &auth.CreateUserResponse{Id: user.Id}, nil
-	}
-}
-
-func NewEndpoints(svc service.AuthSvc) Endpoints {
-	return Endpoints{
-		LoginEndpoint:      MakeLoginEndpoint(svc),
-		GetUserEndpoint:    MakeGetUserEndpoint(svc),
-		CreateUserEndpoint: MakeCreateUserEndpoint(svc),
 	}
 }
