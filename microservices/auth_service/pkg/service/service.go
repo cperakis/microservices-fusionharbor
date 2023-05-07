@@ -66,17 +66,13 @@ func (s AuthSvc) GetUser(ctx context.Context, req *auth.GetUserRequest) (*auth.G
 		return nil, ErrUnauthorized
 	}
 
+	// Print the raw token claims
+	level.Info(s.logger).Log("msg", "Raw token claims:", "claims", token.Claims)
+
 	// Get the user ID from the token claims.
-	claims, ok := token.Claims.(jwt.MapClaims)
+	_, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		level.Error(s.logger).Log("msg", "Failed to get claims from token")
-		return nil, ErrUnauthorized
-	}
-
-	// Verify the user ID from the request matches the user ID in the token.
-	userID := claims["id"].(string)
-	if userID != req.Id {
-		level.Error(s.logger).Log("msg", "User ID mismatch")
 		return nil, ErrUnauthorized
 	}
 
@@ -153,6 +149,6 @@ func (s AuthSvc) validateToken(tokenString string) (*jwt.Token, error) {
 		return nil, ErrUnauthorized
 	}
 
-	level.Info(s.logger).Log("msg", "Token validated successfully")
+	level.Info(s.logger).Log("msg", "Token validated successfully:", token)
 	return token, nil
 }
