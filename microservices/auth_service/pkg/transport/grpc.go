@@ -14,6 +14,7 @@ type grpcServer struct {
 	getUser    grpc.Handler
 	getUsers   grpc.Handler
 	createUser grpc.Handler
+	deleteUser grpc.Handler
 	auth.UnimplementedAuthServiceServer
 }
 
@@ -30,6 +31,11 @@ func NewGRPCServer(endpoints endpoints.Endpoints) auth.AuthServiceServer {
 			endpoints.GetUserEndpoint,
 			DecodeGRPCGetUserRequest,
 			EncodeGRPCGetUserResponse,
+		),
+		deleteUser: grpc.NewServer(
+			endpoints.DeleteUserEndpoint,
+			DecodeGRPCDeleteUserRequest,
+			EncodeGRPCDeleteUserResponse,
 		),
 		getUsers: grpc.NewServer(
 			endpoints.GetUsersEndpoint,
@@ -63,6 +69,14 @@ func (s *grpcServer) GetUser(ctx context.Context, req *auth.GetUserRequest) (*au
 		return nil, err
 	}
 	return resp.(*auth.GetUserResponse), nil
+}
+
+func (s *grpcServer) DeleteUser(ctx context.Context, req *auth.DeleteUserRequest) (*auth.DeleteUserResponse, error) {
+	_, resp, err := s.deleteUser.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*auth.DeleteUserResponse), nil
 }
 
 func (s *grpcServer) GetUsers(ctx context.Context, req *auth.GetUsersRequest) (*auth.GetUsersResponse, error) {
@@ -110,5 +124,13 @@ func DecodeGRPCCreateUserRequest(_ context.Context, grpcReq interface{}) (interf
 }
 
 func EncodeGRPCCreateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
+	return response, nil
+}
+
+func DecodeGRPCDeleteUserRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	return grpcReq, nil
+}
+
+func EncodeGRPCDeleteUserResponse(_ context.Context, response interface{}) (interface{}, error) {
 	return response, nil
 }

@@ -12,6 +12,7 @@ type Endpoints struct {
 	LoginEndpoint      endpoint.Endpoint
 	GetUserEndpoint    endpoint.Endpoint
 	GetUsersEndpoint   endpoint.Endpoint
+	DeleteUserEndpoint endpoint.Endpoint
 	CreateUserEndpoint endpoint.Endpoint
 }
 
@@ -20,6 +21,7 @@ func NewEndpoints(svc service.AuthSvc) Endpoints {
 		LoginEndpoint:      MakeLoginEndpoint(svc),
 		GetUserEndpoint:    MakeGetUserEndpoint(svc),
 		GetUsersEndpoint:   MakeGetUsersEndpoint(svc),
+		DeleteUserEndpoint: MakeDeleteUserEndpoint(svc),
 		CreateUserEndpoint: MakeCreateUserEndpoint(svc),
 	}
 }
@@ -52,6 +54,17 @@ func MakeGetUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 	}
 }
 
+func MakeDeleteUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(*auth.GetUserRequest)
+		err := svc.DeleteUser(ctx, &auth.DeleteUserRequest{Id: req.Id, Token: req.Token})
+		if err != nil {
+			return nil, err
+		}
+		return &auth.DeleteUserResponse{}, nil
+	}
+}
+
 func MakeGetUsersEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*auth.GetUsersRequest)
@@ -73,6 +86,7 @@ func MakeCreateUserEndpoint(svc service.AuthSvc) endpoint.Endpoint {
 			Email:    req.Email,
 			Role:     req.Role,
 			Password: req.Password,
+			Team:     req.Team,
 		}
 		user, err := svc.CreateUser(ctx, createUser)
 		if err != nil {

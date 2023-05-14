@@ -13,6 +13,7 @@ type UserStore interface {
 	GetUser(username string) (*auth.User, error)
 	GetUsers() ([]*auth.User, error)
 	GetUserByID(id string) (*auth.User, error)
+	DeleteUser(id string) error
 	CreateUser(user *auth.User) error
 }
 
@@ -22,6 +23,7 @@ type User struct {
 	Password string
 	Email    string `gorm:"unique"`
 	Role     string
+	Team     string
 }
 
 type gormUserStore struct {
@@ -90,6 +92,18 @@ func (s *gormUserStore) CreateUser(user *auth.User) error {
 	userDB.Password = user.Password
 	userDB.Username = user.Username
 	err := s.db.Create(&userDB).Error
+	return err
+}
+
+func (s *gormUserStore) DeleteUser(id string) error {
+	user := User{}
+	err := s.db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("user not found")
+		}
+		return err
+	}
 	return err
 }
 

@@ -8,6 +8,7 @@ service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc GetUser(GetUserRequest) returns (GetUserResponse);
   rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 }
 
@@ -25,6 +26,10 @@ message GetUserRequest {
   string id = 1;
   string token = 2;
 }
+message DeleteUserRequest {
+  string id = 1;
+  string token = 2;
+}
 
 message GetUsersRequest {
   string token = 2;
@@ -32,6 +37,10 @@ message GetUsersRequest {
 
 message GetUserResponse {
   User user = 1;
+}
+
+message DeleteUserResponse {
+  ;
 }
 
 message GetUsersResponse {
@@ -43,6 +52,7 @@ message CreateUserRequest {
   string email = 2;
   string password = 3;
   string role = 4;
+  string team = 5;
 }
 
 message CreateUserResponse {
@@ -56,4 +66,5 @@ message User {
   string password = 3;
   string email = 4;
   string role = 5;
+  string team = 6;
 }
