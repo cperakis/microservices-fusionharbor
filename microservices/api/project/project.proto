@@ -7,6 +7,8 @@ option go_package = "github.com/fusionharbor/microservices/api/project";
 service ProjectService {
   rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
   rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+  rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse); // New RPC for getting all projects
 }
 
 message GetProjectRequest {
@@ -27,4 +29,27 @@ message CreateProjectRequest {
 message CreateProjectResponse {
   string id = 1;
   string message = 2;
+}
+
+message DeleteProjectRequest {
+  string id = 1;
+}
+
+message DeleteProjectResponse {
+  string message = 1;
+}
+
+// GetProjectsRequest is the request message for the GetProjects RPC.
+message GetProjectsRequest {}
+
+// GetProjectsResponse is the response message for the GetProjects RPC.
+message GetProjectsResponse {
+  repeated Project projects = 1; // An array of projects
+}
+
+// Project represents a project. It's used in GetProjectsResponse.
+message Project {
+  string id = 1;
+  string name = 2;
+  string description = 3;
 }

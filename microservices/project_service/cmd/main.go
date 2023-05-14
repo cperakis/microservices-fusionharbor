@@ -2,36 +2,50 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
+	"os"
 
 	"github.com/fusionharbor/microservices/api/project"
 	"github.com/fusionharbor/microservices/project_service/pkg/db"
 	"github.com/fusionharbor/microservices/project_service/pkg/endpoints"
 	"github.com/fusionharbor/microservices/project_service/pkg/service"
 	"github.com/fusionharbor/microservices/project_service/pkg/transport"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	// Create a logger instance
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	logger = level.NewFilter(logger, level.AllowInfo())
+
+	// Set up different log levels
+	infoLogger := level.Info(logger)
+	errorLogger := level.Error(logger)
+
+	infoLogger.Log("message", "Starting Project Service") // Log an informational message
+
 	listener, err := net.Listen("tcp", ":8082")
 	if err != nil {
+		errorLogger.Log("error", err) // Log any errors with the error level
 		panic(err)
 	}
 
-	dsn := "youruser:yourpassword@tcp(localhost:3306)/yourdbname?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "cperakis:@/fusionharbor?charset=utf8&parseTime=True&loc=Local"
 	projectDB, err := db.NewGormProjectDB(dsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+		errorLogger.Log("error", fmt.Sprintf("Failed to connect to the database: %v", err))
+		panic(err)
 	}
 
-	projectService := service.NewProjectService(projectDB)
+	projectService := service.NewProjectService(projectDB, logger)
 
 	projectEndpoints := endpoints.MakeEndpoints(*projectService)
 
 	grpcServer := grpc.NewServer()
 	project.RegisterProjectServiceServer(grpcServer, transport.NewGRPCServer(projectEndpoints))
 
-	fmt.Println("Starting Project Service on :8082")
+	infoLogger.Log("message", "Starting Project Service on :8082") // Log an informational message
 	grpcServer.Serve(listener)
 }
