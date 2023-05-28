@@ -16,14 +16,13 @@ message GetProjectRequest {
 }
 
 message GetProjectResponse {
-  string id = 1;
-  string name = 2;
-  string description = 3;
+  Project project = 1;
 }
 
 message CreateProjectRequest {
   string name = 1;
   string description = 2;
+  string metadata = 3;
 }
 
 message CreateProjectResponse {
@@ -52,4 +51,5 @@ message Project {
   string id = 1;
   string name = 2;
   string description = 3;
+  string metadata = 4;
 }

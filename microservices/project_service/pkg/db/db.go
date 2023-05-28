@@ -10,7 +10,7 @@ import (
 
 // Project represents a project in the database.
 type Project struct {
-	ID          string `gorm:"primaryKey"`
+	gorm.Model
 	Name        string
 	Description string
 	Metadata    string

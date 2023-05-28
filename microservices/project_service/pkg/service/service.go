@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/fusionharbor/microservices/api/project"
 	"github.com/fusionharbor/microservices/project_service/pkg/db"
@@ -35,21 +36,25 @@ func (s *ProjectService) GetProject(ctx context.Context, req *project.GetProject
 	}
 
 	s.Logger.Log("info", "GetProject successful", "id", p.ID)
-
-	return &project.GetProjectResponse{
-		Id:          p.ID,
+	prj := &project.Project{
+		Id:          strconv.Itoa(int(p.ID)),
 		Name:        p.Name,
 		Description: p.Description,
+		Metadata:    p.Metadata,
+	}
+	return &project.GetProjectResponse{
+		Project: prj,
 	}, nil
 }
 
 // CreateProject is a method that creates a new project.
 // It logs the error if there is one, and it also logs the successful creation of a project.
 func (s *ProjectService) CreateProject(ctx context.Context, req *project.CreateProjectRequest) (*project.CreateProjectResponse, error) {
+	s.Logger.Log("info", "CreateProject request received", "name", req.Name, "description", req.Description, "metadata", req.Metadata)
 	dbproject := &db.Project{
-		ID:          "some_generated_id",
 		Name:        req.Name,
 		Description: req.Description,
+		Metadata:    req.Metadata,
 	}
 
 	err := s.DB.CreateProject(dbproject)
@@ -61,7 +66,7 @@ func (s *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 	s.Logger.Log("info", "CreateProject successful", "id", dbproject.ID)
 
 	return &project.CreateProjectResponse{
-		Id:      dbproject.ID,
+		Id:      strconv.Itoa(int(dbproject.ID)),
 		Message: "Project created successfully",
 	}, nil
 }
@@ -69,6 +74,7 @@ func (s *ProjectService) CreateProject(ctx context.Context, req *project.CreateP
 // DeleteProject is a method that deletes a project by its ID.
 // It logs the error if there is one, and it also logs the successful deletion of a project.
 func (s *ProjectService) DeleteProject(ctx context.Context, req *project.DeleteProjectRequest) (*project.DeleteProjectResponse, error) {
+	s.Logger.Log("info", "DeleteProject request received", "id", req.Id)
 	err := s.DB.DeleteProject(req.Id)
 	if err != nil {
 		s.Logger.Log("error", err)
@@ -96,7 +102,7 @@ func (s *ProjectService) GetProjects(ctx context.Context, req *project.GetProjec
 	responseProjects := make([]*project.Project, len(projects))
 	for i, p := range projects {
 		responseProjects[i] = &project.Project{
-			Id:          p.ID,
+			Id:          strconv.Itoa(int(p.ID)),
 			Name:        p.Name,
 			Description: p.Description,
 		}
