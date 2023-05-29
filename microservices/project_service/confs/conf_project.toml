@@ -1,1 +1,6 @@
 
+# The expiration_cookie is the time in seconds until the cookie expires.
+expiration_cookie = 7200
+
+# The 'port' will open the API on the specific network port.
+port = 8082
