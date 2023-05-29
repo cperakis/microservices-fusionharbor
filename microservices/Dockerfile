@@ -18,21 +18,14 @@ COPY ./${service} ./${service}
 RUN cd ./${service} && go mod download
 
 
-
-
-
 # Build the Go app
 RUN cd ./${service}/cmd && go build -o main
 
 
-# Stage 2: Create a minimal runtime image
+
+COPY --from=build-stage ${service}/cmd/main ./{service}.exec
 
 
 
-# Copy the executable from the builder stage
 
-# Expose port 8080 to the outside world
-EXPOSE 8080
-
-# Command to run the executable
 
