@@ -5,6 +5,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/fusionharbor/microservices/project_service/confs"
+
 	"github.com/fusionharbor/microservices/api/project"
 	"github.com/fusionharbor/microservices/project_service/pkg/db"
 	"github.com/fusionharbor/microservices/project_service/pkg/endpoints"
@@ -26,13 +28,13 @@ func main() {
 
 	infoLogger.Log("message", "Starting Project Service") // Log an informational message
 
-	listener, err := net.Listen("tcp", ":8082")
+	listener, err := net.Listen("tcp", confs.Conf.Port)
 	if err != nil {
 		errorLogger.Log("error", err) // Log any errors with the error level
 		panic(err)
 	}
 
-	dsn := "cperakis:@/fusionharbor?charset=utf8&parseTime=True&loc=Local"
+	dsn := confs.Conf.Database
 	projectDB, err := db.NewGormProjectDB(dsn)
 	if err != nil {
 		errorLogger.Log("error", fmt.Sprintf("Failed to connect to the database: %v", err))

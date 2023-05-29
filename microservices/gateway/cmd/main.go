@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/fusionharbor/microservices/gateway/confs"
+
 	"github.com/fusionharbor/microservices/api/auth"
 	"github.com/fusionharbor/microservices/api/project"
 	"github.com/fusionharbor/microservices/gateway/pkg/authproxy"
@@ -16,13 +18,13 @@ import (
 
 func main() {
 	// Create gRPC connections to Auth and Project services
-	authConn, err := grpc.Dial("localhost:8081", grpc.WithInsecure())
+	authConn, err := grpc.Dial(confs.Conf.AuthPort, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
 	defer authConn.Close()
 
-	projectConn, err := grpc.Dial("localhost:8082", grpc.WithInsecure())
+	projectConn, err := grpc.Dial(confs.Conf.ProjectPort, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
@@ -45,7 +47,7 @@ func main() {
 
 	// Start the gateway
 	level.Info(logger).Log("msg", "Starting gateway service on port 8080...")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(confs.Conf.Port, r); err != nil {
 		panic(err)
 	}
 }

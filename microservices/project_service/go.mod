@@ -11,6 +11,7 @@ require (
 	github.com/fusionharbor/microservices/project_service v0.0.0-00010101000000-000000000000
 	github.com/go-kit/kit v0.12.0
 	github.com/gorilla/mux v1.8.0
+	github.com/pelletier/go-toml v1.9.5
 	google.golang.org/grpc v1.54.0
 	gorm.io/driver/mysql v1.5.0
 	gorm.io/gorm v1.25.0

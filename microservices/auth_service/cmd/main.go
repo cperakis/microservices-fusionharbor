@@ -5,6 +5,8 @@ import (
 	"net"
 	"os"
 
+	"github.com/fusionharbor/microservices/auth_service/confs"
+
 	// Importing packages for database, endpoints, services, and transport
 	"github.com/fusionharbor/microservices/auth_service/pkg/db"
 	"github.com/fusionharbor/microservices/auth_service/pkg/endpoints"
@@ -22,7 +24,7 @@ func main() {
 	logger = level.NewFilter(logger, level.AllowInfo())
 
 	// Listen for incoming connections on port 8081
-	listener, err := net.Listen("tcp", ":8081")
+	listener, err := net.Listen("tcp", confs.Conf.Port)
 	if err != nil {
 		level.Error(logger).Log("msg", "Failed to listen", "error", err)
 		os.Exit(1)
@@ -35,7 +37,7 @@ func main() {
 	reflection.Register(s)
 
 	// Configure the database connection
-	dsn := "cperakis:@/fusionharbor?charset=utf8&parseTime=True&loc=Local"
+	dsn := confs.Conf.Database
 
 	// Create a new GormUserStore with the given data source
 	userStore, err := db.NewGormUserStore(dsn)

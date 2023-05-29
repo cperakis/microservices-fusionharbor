@@ -17,10 +17,13 @@ require (
 	gorm.io/gorm v1.25.0
 )
 
-require golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
+require (
+	github.com/go-kit/log v0.2.0
+	github.com/pelletier/go-toml v1.9.5
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
+)
 
 require (
-	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect

@@ -14,12 +14,13 @@ require (
 	github.com/fusionharbor/microservices/api v0.0.0-00010101000000-000000000000
 	github.com/fusionharbor/microservices/gateway v0.0.0-00010101000000-000000000000
 	github.com/go-kit/kit v0.12.0
+	github.com/go-kit/log v0.2.0
 	github.com/gorilla/mux v1.8.0
+	github.com/pelletier/go-toml v1.9.5
 	google.golang.org/grpc v1.54.0
 )
 
 require (
-	github.com/go-kit/log v0.2.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	golang.org/x/net v0.8.0 // indirect
